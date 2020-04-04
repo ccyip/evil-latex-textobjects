@@ -1,8 +1,3 @@
-Project Status
-==============
-
-This project is currently unmaintained.
-
 LaTeX text objects for evil
 ===========================
 
@@ -17,7 +12,7 @@ To use this package, add the following to your emacs init file:
 ```
 (add-to-list 'load-path "/path/to/package")
 (require 'evil-latex-textobjects)
-(add-hook 'LaTeX-mode-hook 'turn-on-evil-latex-textobjects-mode)
+(add-hook 'LaTeX-mode-hook #'evil-latex-textobjects-setup)
 ```
 
 Usage

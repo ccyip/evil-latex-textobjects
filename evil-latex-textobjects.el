@@ -35,7 +35,7 @@
 ;;; To enable this mode in LaTeX buffers, add this to your init file:
 ;;;
 ;;; (require 'evil-latex-textobjects)
-;;; (add-hook 'LaTeX-mode-hook 'turn-on-evil-latex-textobjects-mode)
+;;; (add-hook 'LaTeX-mode-hook #'evil-latex-textobjects-setup)
 
 ;;; Code:
 
@@ -44,22 +44,18 @@
 
 (evil-define-text-object evil-latex-textobjects-inner-dollar (count &optional beg end type)
   "Select inner dollar"
-  :extend-selection nil
   (evil-select-quote ?$ beg end type count nil))
 
 (evil-define-text-object evil-latex-textobjects-a-dollar (count &optional beg end type)
   "Select a dollar"
-  :extend-selection t
   (evil-select-quote ?$ beg end type count t))
 
 (evil-define-text-object evil-latex-textobjects-inner-math (count &optional beg end type)
-  "Select innter \\[ \\] or \\( \\)."
-  :extend-selection nil
+  "Select inner \\[ \\] or \\( \\)."
   (evil-select-paren "\\\\\\[\\|\\\\(" "\\\\)\\|\\\\\\]" beg end type count nil))
 
 (evil-define-text-object evil-latex-textobjects-a-math (count &optional beg end type)
   "Select a \\[ \\] or \\( \\)."
-  :extend-selection nil
   (evil-select-paren "\\\\\\[\\|\\\\(" "\\\\)\\|\\\\\\]" beg end type count t))
 
 (defun evil-latex-textobjects-macro-beginning ()
@@ -88,9 +84,6 @@ If no such macro can be found, return nil"
         (when (looking-back "}\\|\\]")
           (backward-char))               ; closing brace
         (cons (point) end)))))
-
-;; TODO Support visual selection
-;; TODO Support count
 
 (evil-define-text-object evil-latex-textobjects-a-macro (count &optional beg end type)
   "Select a TeX macro"
@@ -122,12 +115,6 @@ If no such macro can be found, return nil"
       (setq beg (point))
       (skip-chars-forward "^{")         ; goto opening brace
       (forward-sexp)                    ; goto closing brace
-      ;; Count the newline after \begin{foo} to the environment header
-      ;; Without this, delete-inner-env would unexpectedly move the end
-      ;; to the same line as the beginning
-      ;; (when (looking-at "[[:blank:]]*$")
-      ;;   (message "Newline")
-      ;;   (forward-line 1))
       (cons beg (point)))))
 
 (defun evil-latex-textobjects-env-end ()
@@ -155,54 +142,16 @@ If no such macro can be found, return nil"
         (end (evil-latex-textobjects-env-end)))
     (list (cdr beg) (car end))))
 
-(defvar evil-latex-textobjects-outer-map (make-sparse-keymap))
-(defvar evil-latex-textobjects-inner-map (make-sparse-keymap))
-
-(set-keymap-parent evil-latex-textobjects-outer-map evil-outer-text-objects-map)
-(set-keymap-parent evil-latex-textobjects-inner-map evil-inner-text-objects-map)
-
-(define-key evil-latex-textobjects-inner-map "$" 'evil-latex-textobjects-inner-dollar)
-(define-key evil-latex-textobjects-outer-map "$" 'evil-latex-textobjects-a-dollar)
-(define-key evil-latex-textobjects-inner-map "\\" 'evil-latex-textobjects-inner-math)
-(define-key evil-latex-textobjects-outer-map "\\" 'evil-latex-textobjects-a-math)
-(define-key evil-latex-textobjects-outer-map "m" 'evil-latex-textobjects-a-macro)
-(define-key evil-latex-textobjects-inner-map "m" 'evil-latex-textobjects-inner-macro)
-(define-key evil-latex-textobjects-outer-map "e" 'evil-latex-textobjects-an-env)
-(define-key evil-latex-textobjects-inner-map "e" 'evil-latex-textobjects-inner-env)
-
 ;;;###autoload
-(define-minor-mode evil-latex-textobjects-mode
-  "Minor mode for latex-specific text objects in evil.
-
-Installs the following additional text objects:
-\\<evil-latex-textobjects-outer-map>
-  \\[evil-latex-textobjects-a-math]\tDisplay math\t\t\\=\\[ .. \\=\\]
-  \\[evil-latex-textobjects-a-dollar]\tInline math\t\t$ .. $
-  \\[evil-latex-textobjects-a-macro]\tTeX macro\t\t\\foo{..}
-  \\[evil-latex-textobjects-an-env]\tLaTeX environment\t\\begin{foo}..\\end{foo}"
-  :keymap (make-sparse-keymap)
-  (evil-normalize-keymaps))
-
-(evil-define-key 'operator evil-latex-textobjects-mode-map
-  "a" evil-latex-textobjects-outer-map
-  "i" evil-latex-textobjects-inner-map)
-
-(evil-define-key 'visual evil-latex-textobjects-mode-map
-  "a" evil-latex-textobjects-outer-map
-  "i" evil-latex-textobjects-inner-map)
-
-;;;###autoload
-(defun turn-on-evil-latex-textobjects-mode ()
-  "Enable evil-latex-textobjects-mode in current buffer."
-  (interactive "")
-  (evil-latex-textobjects-mode 1))
-
-;;;###autoload
-(defun turn-off-evil-latex-textobjects-mode ()
-  "Disable evil-latex-textobjects-mode in current buffer."
-  (interactive "")
-  (evil-latex-textobjects-mode -1))
-
+(defun evil-latex-textobjects-setup ()
+  (define-key evil-inner-text-objects-map "$" #'evil-latex-textobjects-inner-dollar)
+  (define-key evil-outer-text-objects-map "$" #'evil-latex-textobjects-a-dollar)
+  (define-key evil-inner-text-objects-map "\\" #'evil-latex-textobjects-inner-math)
+  (define-key evil-outer-text-objects-map "\\" #'evil-latex-textobjects-a-math)
+  (define-key evil-outer-text-objects-map "m" #'evil-latex-textobjects-a-macro)
+  (define-key evil-inner-text-objects-map "m" #'evil-latex-textobjects-inner-macro)
+  (define-key evil-outer-text-objects-map "e" #'evil-latex-textobjects-an-env)
+  (define-key evil-inner-text-objects-map "e" #'evil-latex-textobjects-inner-env))
 
 (provide 'evil-latex-textobjects)
 

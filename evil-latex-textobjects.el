@@ -89,11 +89,15 @@
 
 (evil-define-text-object evil-latex-textobjects-inner-math (count &optional beg end type)
   "Select inner \\[ \\] or \\( \\)."
-  (evil-select-paren "\\\\\\[\\|\\\\(" "\\\\)\\|\\\\\\]" beg end type count nil))
+  (evil-latex-textobjects--select-block
+   '(("\\\\\\[" . "\\\\\\]") ("\\\\(" . "\\\\)"))
+   beg end type count nil))
 
 (evil-define-text-object evil-latex-textobjects-a-math (count &optional beg end type)
   "Select a \\[ \\] or \\( \\)."
-  (evil-select-paren "\\\\\\[\\|\\\\(" "\\\\)\\|\\\\\\]" beg end type count t))
+  (evil-latex-textobjects--select-block
+   '(("\\\\\\[" . "\\\\\\]") ("\\\\(" . "\\\\)"))
+   beg end type count t))
 
 (defun evil-latex-textobjects-macro-beginning ()
   "Return (start . end) of the macro-beginning to the left of point.

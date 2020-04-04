@@ -184,17 +184,33 @@ If no such macro can be found, return nil"
     (list (cdr beg) (car end))))
 
 ;;;###autoload
+(defun evil-latex-textobjects-bind-keys (inner-map outer-map)
+  (define-key inner-map "\"" #'evil-latex-textobjects-inner-quote)
+  (define-key outer-map "\"" #'evil-latex-textobjects-a-quote)
+  (define-key inner-map "$" #'evil-latex-textobjects-inner-dollar)
+  (define-key outer-map "$" #'evil-latex-textobjects-a-dollar)
+  (define-key inner-map "\\" #'evil-latex-textobjects-inner-math)
+  (define-key outer-map "\\" #'evil-latex-textobjects-a-math)
+  (define-key outer-map "m" #'evil-latex-textobjects-a-macro)
+  (define-key inner-map "m" #'evil-latex-textobjects-inner-macro)
+  (define-key outer-map "e" #'evil-latex-textobjects-an-env)
+  (define-key inner-map "e" #'evil-latex-textobjects-inner-env))
+
+(defvar evil-latex-textobjects-outer-map (make-sparse-keymap))
+(defvar evil-latex-textobjects-inner-map (make-sparse-keymap))
+
+(set-keymap-parent evil-latex-textobjects-outer-map evil-outer-text-objects-map)
+(set-keymap-parent evil-latex-textobjects-inner-map evil-inner-text-objects-map)
+
+(evil-latex-textobjects-bind-keys evil-latex-textobjects-inner-map
+                                  evil-latex-textobjects-outer-map)
+
+;;;###autoload
 (defun evil-latex-textobjects-setup ()
-  (define-key evil-inner-text-objects-map "\"" #'evil-latex-textobjects-inner-quote)
-  (define-key evil-outer-text-objects-map "\"" #'evil-latex-textobjects-a-quote)
-  (define-key evil-inner-text-objects-map "$" #'evil-latex-textobjects-inner-dollar)
-  (define-key evil-outer-text-objects-map "$" #'evil-latex-textobjects-a-dollar)
-  (define-key evil-inner-text-objects-map "\\" #'evil-latex-textobjects-inner-math)
-  (define-key evil-outer-text-objects-map "\\" #'evil-latex-textobjects-a-math)
-  (define-key evil-outer-text-objects-map "m" #'evil-latex-textobjects-a-macro)
-  (define-key evil-inner-text-objects-map "m" #'evil-latex-textobjects-inner-macro)
-  (define-key evil-outer-text-objects-map "e" #'evil-latex-textobjects-an-env)
-  (define-key evil-inner-text-objects-map "e" #'evil-latex-textobjects-inner-env))
+  (define-key evil-visual-state-local-map "a" evil-latex-textobjects-outer-map)
+  (define-key evil-visual-state-local-map "i" evil-latex-textobjects-inner-map)
+  (define-key evil-operator-state-local-map "a" evil-latex-textobjects-outer-map)
+  (define-key evil-operator-state-local-map "i" evil-latex-textobjects-inner-map))
 
 (provide 'evil-latex-textobjects)
 

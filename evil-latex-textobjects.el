@@ -1,8 +1,10 @@
 ;;; evil-latex-textobjects.el --- LaTeX text objects for evil
 
 ;; Copyright (C) 2015  Hans-Peter Deifel
+;; Copyright (C) 2020  Qianchuan Ye
 
 ;; Author: Hans-Peter Deifel <hpd@hpdeifel.de>
+;;         Qianchuan Ye <yeqianchuan@gmail.com>
 ;; Keywords: tex, wp, convenience, vi, evil
 ;; Version: 1.0-git
 ;; Package-Requires: ((evil "1.0") (auctex "11.88"))
@@ -26,11 +28,12 @@
 ;;;
 ;;; Provides a minor mode that installs several additional LaTeX
 ;;; specific text objects for evil-mode:
-;;; 
-;;;  \	Display math		\[ .. \]
-;;;  $	Inline math		$ .. $
-;;;  m	TeX macro		\foo{..}
-;;;  e	LaTeX environment	\begin{foo}..\end{foo}
+;;;
+;;;  "  Quote                `` .. '' or " .. "
+;;;  \  Display math         \[ .. \] or \( .. \)
+;;;  $  Inline math          $ .. $
+;;;  m  TeX macro            \foo{..}
+;;;  e  LaTeX environment    \begin{foo}..\end{foo}
 ;;;
 ;;; To enable this mode in LaTeX buffers, add this to your init file:
 ;;;
@@ -41,6 +44,40 @@
 
 (require 'evil)
 (require 'latex)
+
+(defun evil-latex-textobjects--select-block (blocks beg end type count inc)
+  (let (result)
+    (dolist (blk blocks result)
+      (let ((range (pcase blk
+                     (`(,open . ,close)
+                      (ignore-errors
+                        (evil-select-paren open close beg end type count inc)))
+                     (char
+                      (ignore-errors
+                        (evil-select-quote char beg end type count inc))))))
+        (pcase range
+          (`(,range-x ,range-y . ,_)
+           (when (and (>= (or beg (point)) range-x)
+                      (<= (or end (point)) range-y))
+             (pcase result
+               (`(,result-x ,result-y . ,_)
+                (when (< (- range-y range-x)
+                         (- result-y result-x))
+                  (setq result range)))
+               (_
+                (setq result range))))))))))
+
+(evil-define-text-object evil-latex-textobjects-inner-quote (count &optional beg end type)
+  "Select inner quote"
+  (evil-latex-textobjects--select-block
+   '(("``" . "''") ?\")
+   beg end type count nil))
+
+(evil-define-text-object evil-latex-textobjects-a-quote (count &optional beg end type)
+  "Select a quote"
+  (evil-latex-textobjects--select-block
+   '(("``" . "''") ?\")
+   beg end type count t))
 
 (evil-define-text-object evil-latex-textobjects-inner-dollar (count &optional beg end type)
   "Select inner dollar"
@@ -144,6 +181,8 @@ If no such macro can be found, return nil"
 
 ;;;###autoload
 (defun evil-latex-textobjects-setup ()
+  (define-key evil-inner-text-objects-map "\"" #'evil-latex-textobjects-inner-quote)
+  (define-key evil-outer-text-objects-map "\"" #'evil-latex-textobjects-a-quote)
   (define-key evil-inner-text-objects-map "$" #'evil-latex-textobjects-inner-dollar)
   (define-key evil-outer-text-objects-map "$" #'evil-latex-textobjects-a-dollar)
   (define-key evil-inner-text-objects-map "\\" #'evil-latex-textobjects-inner-math)

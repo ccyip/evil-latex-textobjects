@@ -20,12 +20,13 @@ Usage
 
 The following additional text objects are available:
 
-| Key | Description                         |
-| --- | ----------------------------------- |
-| $   | Inline math, delimited by $$        |
-| \\  | Display math, delimited by \\[ \\]  |
-| m   | TeX macro \\foo{}                   |
-| e   | LaTeX environment \\begin{} \\end{} |
+| Key | Description                                   |
+| --- | --------------------------------------------- |
+| "   | Quote, delimited by " " or `` ''              |
+| $   | Inline math, delimited by $$                  |
+| \\  | Display math, delimited by \\[ \\] or \\( \\) |
+| m   | TeX macro \\foo{}                             |
+| e   | LaTeX environment \\begin{} \\end{}           |
 
 All text objects come in *inner* and *outer* variants. For example, to
 delete the the whole surrounding environment, type <kbd>dae</kbd>. To
@@ -33,6 +34,16 @@ delete only the part between `begin` and `end`, type <kbd>die</kbd>.
 
 The text objects
 ----------------
+
+### Quote (") ###
+
+```
+ outer
+,-------,
+`` foo ''
+  `---'
+  inner
+```
 
 ### Inline math ($) ###
 

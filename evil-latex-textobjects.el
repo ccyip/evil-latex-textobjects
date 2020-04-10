@@ -128,7 +128,6 @@ If no such macro can be found, return nil"
 
 (evil-define-text-object evil-latex-textobjects-a-macro (count &optional beg end type)
   "Select a TeX macro"
-  :extend-selection nil
   (let ((beg (evil-latex-textobjects-macro-beginning))
         (end (evil-latex-textobjects-macro-end)))
     (if (and beg end)
@@ -137,7 +136,6 @@ If no such macro can be found, return nil"
 
 (evil-define-text-object evil-latex-textobjects-inner-macro (count &optional beg end type)
   "Select inner TeX macro"
-  :extend-selection nil
   (let ((beg (evil-latex-textobjects-macro-beginning))
         (end (evil-latex-textobjects-macro-end)))
     (cond

@@ -202,9 +202,11 @@ If no such macro can be found, return nil"
 
 ;;;###autoload
 (defun evil-latex-textobjects-setup ()
+  (setq-local evil-inner-text-objects-map evil-latex-textobjects-inner-map)
+  (setq-local evil-outer-text-objects-map evil-latex-textobjects-outer-map)
   (evil-define-key '(visual operator) 'local
-    "i" evil-latex-textobjects-inner-map
-    "a" evil-latex-textobjects-outer-map))
+    "i" evil-inner-text-objects-map
+    "a" evil-outer-text-objects-map))
 
 (provide 'evil-latex-textobjects)
 
